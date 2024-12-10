@@ -32,7 +32,7 @@ class Game24Task(Task):
         path = os.path.join(DATA_PATH, '24', file)
         self.data = list(pd.read_csv(path)['Puzzles'])
         self.value_cache = {}
-        self.steps = 4
+        self.steps = [4] * len(self.data)
         self.stops = ['\n'] * 4
 
     def __len__(self) -> int:
@@ -90,3 +90,7 @@ class Game24Task(Task):
         value_map = {'impossible': 0.001, 'likely': 1, 'sure': 20}  # TODO: ad hoc
         value = sum(value * value_names.count(name) for name, value in value_map.items())
         return value
+
+    # @staticmethod
+    # def check_proposals(x: str, y: str, proposals: list) -> list:
+    #     return proposals

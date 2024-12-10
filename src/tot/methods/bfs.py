@@ -34,6 +34,9 @@ def get_votes(task, x, ys, n_evaluate_sample):
 def get_proposals(task, x, y): 
     propose_prompt = task.propose_prompt_wrap(x, y)
     proposals = gpt(propose_prompt, n=1, stop=None)[0].split('\n')
+    # print(f"proposals: {proposals}")
+    # valid_proposals = task.check_proposals(x, y, proposals)
+    # print(f"valid proposals: {valid_proposals}")
     return [y + _ + '\n' for _ in proposals]
 
 def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
@@ -51,9 +54,12 @@ def solve(args, task, idx, to_print=True):
     gpt = partial(gpt, model=args.backend, temperature=args.temperature)
     print(gpt)
     x = task.get_input(idx)  # input
+    print(f"x: \n{x}")
+    print("-"*20)
     ys = ['']  # current output candidates
     infos = []
-    for step in range(task.steps):
+    num_steps = task.steps[idx]
+    for step in range(num_steps):
         # generation
         if args.method_generate == 'sample':
             new_ys = [get_samples(task, x, y, args.n_generate_sample, prompt_sample=args.prompt_sample, stop=task.stops[step]) for y in ys]
@@ -61,6 +67,7 @@ def solve(args, task, idx, to_print=True):
             new_ys = [get_proposals(task, x, y) for y in ys]
         new_ys = list(itertools.chain(*new_ys))
         ids = list(range(len(new_ys)))
+
         # evaluation
         if args.method_evaluate == 'vote':
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
@@ -76,9 +83,21 @@ def solve(args, task, idx, to_print=True):
         select_new_ys = [new_ys[select_id] for select_id in select_ids]
 
         # log
-        if to_print: 
-            sorted_new_ys, sorted_values = zip(*sorted(zip(new_ys, values), key=lambda x: x[1], reverse=True))
-            print(f'-- new_ys --: {sorted_new_ys}\n-- sol values --: {sorted_values}\n-- choices --: {select_new_ys}\n')
+        if to_print:
+            try:
+                sorted_new_ys, sorted_values = zip(*sorted(zip(new_ys, values), key=lambda x: x[1], reverse=True))
+                print(f"Step: {step}")
+                print("--- new_ys and values ---")
+                for p_y, p_v in zip(sorted_new_ys, sorted_values):
+                    print(f"-- new_y: \n{p_y}")
+                    print(f"-- new_v: {p_v}\n--")
+                print(
+                    f"""-- selected choices --: {select_new_ys}\n"""
+                )
+            except Exception as e:
+                print(f"Error: {e}")
+                print(f"new_ys: {new_ys}")
+                print(f"values: {values}")
         
         infos.append({'step': step, 'x': x, 'ys': ys, 'new_ys': new_ys, 'values': values, 'select_new_ys': select_new_ys})
         ys = select_new_ys
