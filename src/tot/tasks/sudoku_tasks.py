@@ -113,7 +113,7 @@ class Sudoku(Task):
     def test_output(self, idx: int, output: str):
         """check if the generated output is valid"""
         solved_puzzle = output.strip().split("\n")[-1].split("next: ")[-1].split(")")[0]
-        print(f"test_output: \n{solved_puzzle}")
+        #print(f"test_output: \n{solved_puzzle}")
         try:
             return {'r': int(verify_3x3_sudoku(solved_puzzle))}
         except Exception as e:
@@ -128,7 +128,7 @@ class Sudoku(Task):
             current_puzzle = x
         else:
             current_puzzle = y.strip().split("\n")[-1]#.split('next: ')[-1].split(')')[0]
-        print(f"propose_prompt_wrap: \n{current_puzzle}")
+        #print(f"propose_prompt_wrap: \n{current_puzzle}")
         prompt = propose_prompt.format(input=current_puzzle)
         return prompt
     
@@ -136,15 +136,15 @@ class Sudoku(Task):
     def value_prompt_wrap(x: str, y: str) -> str:
         current_puzzle = y.strip().split("\n")[-1]#.split('next: ')[-1].split(')')[0]
         if verify_3x3_sudoku_completeness(current_puzzle):  # last step
-            print(f"value_prompt_wrap (last line): \n{current_puzzle}")
+            #print(f"value_prompt_wrap (last line): \n{current_puzzle}")
             return value_last_step_prompt.format(answer=current_puzzle)
-        print(f"value_prompt_wrap: \n{current_puzzle}")
+        #print(f"value_prompt_wrap: \n{current_puzzle}")
         return value_prompt.format(input=current_puzzle)
 
     @staticmethod
     def value_outputs_unwrap(x: str, y: str, value_outputs: list) -> float:
         value_names = [_.split('\n')[-1] for _ in value_outputs]
-        print(f"value_names: {value_names}")
+        #print(f"value_names: {value_names}")
         value_map = {'impossible': 0.001, 'likely': 1, 'sure': 20}  # TODO: ad hoc
         value = sum(value * value_names.count(name) for name, value in value_map.items())
         return value
