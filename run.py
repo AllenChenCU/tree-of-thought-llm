@@ -4,6 +4,7 @@ import argparse
 
 from tot.tasks import get_task
 from tot.methods.bfs import solve, naive_solve
+from tot.methods.dfs import dfs_solve_new, astar_solve
 from tot.models import gpt_usage
 
 def run(args):
@@ -19,21 +20,37 @@ def run(args):
         # solve
         if args.naive_run:
             ys, info = naive_solve(args, task, i) 
-        else:
+        elif args.method_search == "bfs":
             ys, info = solve(args, task, i)
+        elif args.method_search == "dfs":
+            ys, info = dfs_solve_new(args, task, i)
+        elif args.method_search == "astar":
+            ys, info = astar_solve(args, task, i)
 
         # log
         infos = [task.test_output(i, y) for y in ys]
-        info.update({'idx': i, 'ys': ys, 'infos': infos, 'usage_so_far': gpt_usage(args.backend)})
+        accs = [info['r'] for info in infos]
+        try:
+            cnt_avg += sum(accs) / len(accs)
+            cnt_any += any(accs)
+            print(i, 'sum(accs)', sum(accs), 'cnt_avg', cnt_avg, 'cnt_any', cnt_any, '\n')
+        except ZeroDivisionError as e:
+            print(f"Error: {e}")
+        
+        info.update(
+            {
+                'idx': i, 
+                'ys': ys, 
+                'infos': infos, 
+                'usage_so_far': gpt_usage(args.backend), 
+                'sum(accs)': sum(accs), 
+                'cnt_avg': cnt_avg, 
+                'cnt_any': cnt_any, 
+            }
+        )
         logs.append(info)
         with open(file, 'w') as f:
             json.dump(logs, f, indent=4)
-        
-        # log main metric
-        accs = [info['r'] for info in infos]
-        cnt_avg += sum(accs) / len(accs)
-        cnt_any += any(accs)
-        print(i, 'sum(accs)', sum(accs), 'cnt_avg', cnt_avg, 'cnt_any', cnt_any, '\n')
     
     n = args.task_end_index - args.task_start_index
     print(cnt_avg / n, cnt_any / n)
@@ -49,7 +66,7 @@ def parse_args():
     args.add_argument('--task_start_index', type=int, default=900)
     args.add_argument('--task_end_index', type=int, default=1000)
 
-    args.add_argument('--naive_run', action='store_true')
+    args.add_argument('--naive_run', action='store_true', default=False)
     args.add_argument('--prompt_sample', type=str, choices=['standard', 'cot'])  # only used when method_generate = sample, or naive_run
 
     args.add_argument('--method_search', type=str, choices=['bfs', 'dfs', 'astar'])

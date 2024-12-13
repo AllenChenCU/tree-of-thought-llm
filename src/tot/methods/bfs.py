@@ -1,4 +1,6 @@
 import itertools
+import time
+
 import numpy as np
 from functools import partial
 from tot.models import gpt
@@ -59,20 +61,32 @@ def solve(args, task, idx, to_print=True):
     ys = ['']  # current output candidates
     infos = []
     num_steps = task.steps[idx]
+    total_times = []
+    generate_times = []
+    evaluate_times = []
+    num_of_generations = [] # number of times LLM is called for generations
+    num_of_evaluations = [] # number of times LLM is called for evaluations
+    end_time = time.time()
     for step in range(num_steps):
         # generation
+        start_time = time.time()
         if args.method_generate == 'sample':
             new_ys = [get_samples(task, x, y, args.n_generate_sample, prompt_sample=args.prompt_sample, stop=task.stops[step]) for y in ys]
         elif args.method_generate == 'propose':
             new_ys = [get_proposals(task, x, y) for y in ys]
+        generate_times.append(time.time() - start_time)
+        num_of_generations.append(len(new_ys))
         new_ys = list(itertools.chain(*new_ys))
         ids = list(range(len(new_ys)))
 
         # evaluation
+        start_time = time.time()
         if args.method_evaluate == 'vote':
             values = get_votes(task, x, new_ys, args.n_evaluate_sample)
         elif args.method_evaluate == 'value':
             values = get_values(task, x, new_ys, args.n_evaluate_sample)
+        evaluate_times.append(time.time() - start_time)
+        num_of_evaluations.append(len(values))
 
         # selection
         if args.method_select == 'sample':
@@ -81,6 +95,11 @@ def solve(args, task, idx, to_print=True):
         elif args.method_select == 'greedy':
             select_ids = sorted(ids, key=lambda x: values[x], reverse=True)[:args.n_select_sample]
         select_new_ys = [new_ys[select_id] for select_id in select_ids]
+
+        infos.append({'step': step, 'x': x, 'ys': ys, 'new_ys': new_ys, 'values': values, 'select_new_ys': select_new_ys})
+        ys = select_new_ys
+        total_times.append(time.time() - end_time)
+        end_time = time.time()
 
         # log
         if to_print:
@@ -98,13 +117,19 @@ def solve(args, task, idx, to_print=True):
                 print(f"Error: {e}")
                 print(f"new_ys: {new_ys}")
                 print(f"values: {values}")
-        
-        infos.append({'step': step, 'x': x, 'ys': ys, 'new_ys': new_ys, 'values': values, 'select_new_ys': select_new_ys})
-        ys = select_new_ys
     
     if to_print: 
         print(ys)
-    return ys, {'steps': infos}
+    results = {
+        'steps': infos, 
+        'total_time': sum(total_times), 
+        'generate_time': sum(generate_times), 
+        'evaluate_time': sum(evaluate_times), 
+        'num_of_generation': sum(num_of_generations), 
+        'num_of_evaluation': sum(num_of_evaluations), 
+        'num_of_steps': num_steps,
+    }
+    return ys, results
 
 def naive_solve(args, task, idx, to_print=True):
     global gpt
