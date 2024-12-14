@@ -203,7 +203,8 @@ def dfs_solve_new(args, task, idx, to_print=True):
             if to_print:
                 print(f"Reached step limit T={T}, recording solution:\n{s}")
             results.append(s)
-            found_solution = True
+            if task.test_output(idx, s)["r"] == 1:
+                found_solution = True
             return
 
         # Generate candidates from current state `s`
@@ -231,12 +232,12 @@ def dfs_solve_new(args, task, idx, to_print=True):
         # Sort candidates by value descending
         sorted_candidates_values = sorted(zip(candidates, values), key=lambda x: x[1], reverse=True)
 
+        top_candidates = sorted_candidates_values[:max_states_per_depth]
+        
         # Logging current step if needed
         if to_print:
-            candidate_strs = [f"{c} (val={v})" for c, v in sorted_candidates_values]
+            candidate_strs = [f"{c} (val={v})" for c, v in top_candidates]
             print(f"Step {t}, Expanding state:\n{s}\nCandidates:\n{candidate_strs}\n")
-
-        top_candidates = sorted_candidates_values[:max_states_per_depth]
 
         # Prune and recurse
         for cand, val in top_candidates:
