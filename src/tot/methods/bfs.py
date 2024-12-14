@@ -125,8 +125,8 @@ def solve(args, task, idx, to_print=True):
         'total_time': sum(total_times), 
         'generate_time': sum(generate_times), 
         'evaluate_time': sum(evaluate_times), 
-        'num_of_generation': sum(num_of_generations), 
-        'num_of_evaluation': sum(num_of_evaluations), 
+        'num_of_generations': sum(num_of_generations), 
+        'num_of_evaluations': sum(num_of_evaluations), 
         'num_of_steps': num_steps,
     }
     return ys, results

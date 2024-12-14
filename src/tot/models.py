@@ -39,9 +39,9 @@ def chatgpt(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop
 def gpt_usage(backend="gpt-4"):
     global completion_tokens, prompt_tokens
     if backend == "gpt-4":
-        cost = completion_tokens / 1000 * 0.06 + prompt_tokens / 1000 * 0.03
+        cost = completion_tokens / 1000000 * 60.0 + prompt_tokens / 1000000 * 30.0
     elif backend == "gpt-3.5-turbo":
-        cost = completion_tokens / 1000 * 0.002 + prompt_tokens / 1000 * 0.0015
+        cost = completion_tokens / 1000000 * 1.5 + prompt_tokens / 1000000 * 0.5
     elif backend == "gpt-4o":
         cost = completion_tokens / 1000000 * 10 + prompt_tokens / 1000000 * 2.5
     elif backend == "gpt-4o-mini":
