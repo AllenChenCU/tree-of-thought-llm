@@ -1,3 +1,55 @@
+# COMSE6998_015 Final Project
+
+Title: The enhanced Tree-of-Thought (ToT) framework
+
+Team members: Allen Chen (atc2160), Yizhi Liu (yl4993)
+
+Note:
+- This project extends the previous study on the Tree-of-Thought framework. Please see below.
+
+## Tutorials
+
+Run the below commands to reproduce experiments.
+
+```
+Game 24 Experiments
+./scripts/game24/run.sh
+
+Sudoku Experiments
+./scripts/sudoku/run.sh
+```
+
+Files to highlight - 
+
+sudoku_prompts.py
+- full path: tree-of-thought-llm/src/tot/prompts/sudoku_prompts.py
+- Customed prompt templates for Sudoku
+
+sudoku_tasks.py
+- full path: tree-of-thought-llm/src/tot/tasks/sudoku_tasks.py
+- Customed class for Sudoku
+
+dfs.py
+- full path: tree-of-thought-llm/src/tot/methods/dfs.py
+- An implementation of DFS traversal algorithm on tasks
+
+bfs.py
+- full path: tree-of-thought-llm/src/tot/methods/bfs.py
+- An implementation of BFS traversal algorithm on tasks
+
+results.ipynb
+- full path: tree-of-thought-llm/results.ipynb
+- An analysis of the logged results
+
+run.sh
+- full path 1: tree-of-thought-llm/scripts/game24/run.sh
+- full path 2: tree-of-thought-llm/scripts/sudoku/run.sh
+- Commands to run the experiments
+
+
+
+
+
 # Official Repo of Tree of Thoughts (ToT)
 
 <p>
