@@ -9,6 +9,18 @@ Note:
 
 ## Tutorials
 
+Run the below commands to set up environments
+```
+# create a virtual environment
+python3 -m venv venv
+
+# activate virtual environment
+source venv/bin/activate
+
+# install required dependencies
+pip install -r requirements.txt
+```
+
 Run the below commands to reproduce experiments.
 
 ```
